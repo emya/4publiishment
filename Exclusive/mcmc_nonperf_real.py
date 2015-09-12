@@ -120,6 +120,7 @@ def mcmc(num, d_file, o_file):
     bmat = original_data
 
     cmat = [[0 for i in range(lenp)] for j in range(lenp)]
+    cmat_in = [[0 for i in range(lenp)] for j in range(lenp)]
     
     p = 1
     mi = -1
@@ -131,9 +132,12 @@ def mcmc(num, d_file, o_file):
 
         for i in range(lenp):
             for j in range(i+1, lenp):
-                if jmat[i][j] >= original_jmat[i][j]:
+                if jmat[i][j] > original_jmat[i][j]:
                     cmat[i][j] += 1
                     cmat[j][i] += 1
+                if jmat[i][j] >= original_jmat[i][j]:
+                    cmat_in[i][j] += 1
+                    cmat_in[j][i] += 1
         count_n += 1
         bmat = deepcopy(mat)
 
@@ -157,5 +161,24 @@ def mcmc(num, d_file, o_file):
         f.write(' '.join([str(x) for x in ll])+'\n')
          
     f.close()
+
+    f = open(o_file+str(num)+"in.txt", 'w')
+    pmat = [[0 for i in range(lenp)] for j in range(lenp)]
+    for i in range(lenp):
+        ll = []
+        for j in range(lenp):
+            if i == j:
+                c = 1.0
+            elif cmat_in[i][j] == 0:
+                c = 0.5/num
+                #c = -math.log10(cc)
+            else: 
+                c = cmat_in[i][j]/float(num)
+                #c = -math.log10(cc)
+            ll.append(c)
+        f.write(' '.join([str(x) for x in ll])+'\n')
+         
+    f.close()
+
 
 mcmc(num_steps, "data_4.txt", "data_4_pmat")
